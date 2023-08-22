@@ -1,4 +1,4 @@
-# dependabotnotifier
+# secretsnotifier
 
 ![workflow](https://github.com/navikt/secretsnotifier/actions/workflows/main.yaml/badge.svg)
 
