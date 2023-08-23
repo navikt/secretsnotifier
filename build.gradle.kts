@@ -23,7 +23,7 @@ kotlin {
         }
     }
 
-    macosX64("native") {
+    linuxX64("native") {
         binaries {
             executable("mac")
         }

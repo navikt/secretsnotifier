@@ -1,0 +1,48 @@
+name: Build and deploy main
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+jobs:
+  build:
+    name: Build all the things
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    env:
+      RUNNER_IMG: "gcr.io/distroless/static-debian11"
+      RUNNERIMG_IDENTITY: "keyless@distroless.iam.gserviceaccount.com"
+      RUNNERIMG_ISSUER: "https://accounts.google.com"
+    outputs:
+      tag: "${{ steps.docker-build-push.outputs.IMAGE }}"
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # ratchet:actions/checkout@v3
+      - uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # ratchet:actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "gradle"
+      - uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4 # ratchet:gradle/wrapper-validation-action@v1
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@243af859f8ca30903d9d7f7936897ca0358ba691 # ratchet:gradle/gradle-build-action@v2
+        with:
+          dependency-graph: generate-and-submit
+      - name: Build and test the app
+        run: ./gradlew nativeBinaries
+      - name: Install cosign
+        uses: sigstore/cosign-installer@37f387123cf7d4270454d0c351cf673ef28a8662 # ratchet:sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v2.1.1'
+      - name: Verify runner image
+        run: cosign verify --certificate-identity ${{ env.RUNNERIMG_IDENTITY }} --certificate-oidc-issuer ${{ env.RUNNERIMG_ISSUER }} ${{ env.RUNNER_IMG }}
+      - uses: nais/docker-build-push@c1d05d5a796be7b24d59a2e76851acdcdbcaff7a # ratchet:nais/docker-build-push@v0
+        id: docker-build-push
+        name: Build and push Docker image
+        with:
+          team: security-champion-admin
+          pull: true
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          push_image: false
