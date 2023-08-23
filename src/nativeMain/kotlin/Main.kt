@@ -1,5 +1,5 @@
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.curl.Curl
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -38,7 +38,7 @@ private fun envOrDie(name: String): String = getenv(name)?.toKString()
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
 
 @OptIn(ExperimentalSerializationApi::class)
-private val httpClient = HttpClient(Curl) {
+private val httpClient = HttpClient(CIO) {
     expectSuccess = true
     install(ContentNegotiation) {
         json(json = Json {
