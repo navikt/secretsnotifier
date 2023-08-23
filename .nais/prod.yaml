@@ -1,0 +1,2 @@
+schedule: "0 7 * * *"
+alert_channel: "security-champion-aktivitet"

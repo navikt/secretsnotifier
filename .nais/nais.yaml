@@ -1,0 +1,24 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: security-champion-admin
+  name:  secretsnotifier
+  namespace: security-champion-admin
+spec:
+  image: {{ image }}
+  schedule: {{ schedule }}
+  ttlSecondsAfterFinished: 300
+  resources:
+    requests:
+      cpu: "100m"
+      memory: 300Mi
+  envFrom:
+    - secret: dependabotnotifier
+  accessPolicy:
+    outbound:
+      external:
+        - host: teams.nav.cloud.nais.io
+        - host: api.github.com
+        - host: slack.com
+
