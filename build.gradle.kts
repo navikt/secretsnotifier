@@ -14,7 +14,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -23,9 +23,16 @@ kotlin {
         }
     }
 
-    linuxX64("native") {
+    val hostOs = System.getProperty("os.name")
+    val arch = System.getProperty("os.arch")
+    when {
+        hostOs == "Mac OS X" && arch == "x86_64" -> macosX64("native")
+        hostOs == "Mac OS X" && arch == "aarch64" -> macosArm64("native")
+        hostOs == "Linux" -> linuxX64("native")
+        else -> throw GradleException("Host OS '$hostOs' is not supported in Kotlin/Native.")
+    }.apply {
         binaries {
-            executable("mac")
+            executable()
         }
     }
 
