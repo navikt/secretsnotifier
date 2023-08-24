@@ -1,5 +1,5 @@
 FROM gcr.io/distroless/static-debian11
 
-COPY build/bin/native/releaseExecutable/secretsnotifier.kexe /secretsnotifier
+COPY --chmod=0744 build/bin/native/releaseExecutable/secretsnotifier.kexe /app/secretsnotifier
 
-ENTRYPOINT ["/secretsnotifier"]
+CMD ["/app/secretsnotifier"]
