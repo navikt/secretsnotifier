@@ -31,6 +31,9 @@ kotlin {
         hostOs == "Linux" -> linuxX64("native")
         else -> throw GradleException("Host OS '$hostOs' is not supported in Kotlin/Native.")
     }.apply {
+        logger.warn("------------------------------")
+        logger.warn("Building for $hostOs $arch")
+        logger.warn("------------------------------")
         binaries {
             executable()
         }
