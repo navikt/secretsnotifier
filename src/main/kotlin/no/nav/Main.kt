@@ -27,7 +27,7 @@ fun main() = runBlocking {
         val heading = ":wave: *Hei, ${team.slug}* :github2:"
         val msg = "GitHub har oppdaget hemmeligheter i repo som dere er admin i:\n\n ${linksTo(repos)}\n\nKlikk på linkene for å se detaljer. Dersom hemmelighetene er aktive må de roteres så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. Når dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
         val result = slack.send(team.slackChannel, heading, msg)
-        if (!result.ok) println("Error while notifying ${team.slug} in ${team.slackChannel}: ${result.errorMessage}")
+        println("Notifying ${team.slug} in ${team.slackChannel}: ${result.ok} ${result.errorMessage ?: ""}")
     }
     println("Done!")
 }
