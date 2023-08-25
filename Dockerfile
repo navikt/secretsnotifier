@@ -1,5 +1,5 @@
-FROM gcr.io/distroless/static-debian11:nonroot
+FROM gcr.io/distroless/java17-debian11:nonroot
 
-COPY --chmod=0755 build/bin/native/releaseExecutable/secretsnotifier.kexe /app/secretsnotifier
+COPY build/libs/app-all.jar /app/app-all.jar
 
-CMD ["/app/secretsnotifier"]
+CMD ["/app/app-all.jar"]

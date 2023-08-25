@@ -1,47 +1,76 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.cyclonedx.gradle.CycloneDxTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+
+val ktorVersion = "2.3.3"
+
+group = "no.nav"
+version = "generatedlater"
+
 plugins {
-    kotlin("multiplatform") version "1.9.10"
+    kotlin("jvm") version "1.9.10"
     kotlin("plugin.serialization") version "1.9.10"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.cyclonedx.bom") version "1.7.4"
 }
 
 repositories {
     mavenCentral()
 }
 
-kotlin {
-    sourceSets {
-        val ktorVersion = "2.3.3"
+dependencies {
+    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.0")
+}
 
-        val commonMain by getting {
-            dependencies {
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+kotlin {
+    jvmToolchain(17)
+}
+
+tasks {
+    withType<Jar> {
+        archiveBaseName.set("app")
+
+        manifest {
+            attributes["Main-Class"] = "no.nav.MainKt"
+            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
+        }
+
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("$buildDir/libs/${it.name}")
+                if (!file.exists())
+                    it.copyTo(file)
             }
         }
     }
 
-    val hostOs = System.getProperty("os.name")
-    val arch = System.getProperty("os.arch")
-    when {
-        hostOs == "Mac OS X" && arch == "x86_64" -> macosX64("native")
-        hostOs == "Mac OS X" && arch == "aarch64" -> macosArm64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        else -> throw GradleException("Host OS '$hostOs' is not supported in Kotlin/Native.")
-    }.apply {
-        logger.warn("------------------------------")
-        logger.warn("Building for $hostOs $arch")
-        logger.warn("------------------------------")
-        binaries {
-            executable()
+    withType<ShadowJar>{
+        archiveFileName.set("app-all.jar")
+    }
+
+    withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            showExceptions = true
+        }
+        testLogging {
+            exceptionFormat = FULL
         }
     }
 
-}
+    withType<Wrapper> {
+        gradleVersion = "8.2.1"
+    }
 
-tasks.withType<Wrapper> {
-    gradleVersion = "8.3"
-    distributionType = Wrapper.DistributionType.BIN
+    withType<CycloneDxTask> {
+        setOutputFormat("json")
+        setIncludeLicenseText(false)
+    }
 }

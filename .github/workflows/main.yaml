@@ -16,7 +16,7 @@ jobs:
       RUNNERIMG_IDENTITY: "keyless@distroless.iam.gserviceaccount.com"
       RUNNERIMG_ISSUER: "https://accounts.google.com"
     outputs:
-      tag: "${{ steps.docker-build-push.outputs.IMAGE }}"
+      tag: "${{ steps.docker-build-push.outputs.image }}"
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # ratchet:actions/checkout@v3
       - uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # ratchet:actions/setup-java@v3
@@ -30,19 +30,22 @@ jobs:
         with:
           dependency-graph: generate-and-submit
       - name: Build and test the app
-        run: ./gradlew nativeBinaries
+        run: ./gradlew test shadowJar
+      - name: Create SBOM
+        run: ./gradlew cyclonedxBom
       - name: Install cosign
         uses: sigstore/cosign-installer@37f387123cf7d4270454d0c351cf673ef28a8662 # ratchet:sigstore/cosign-installer@main
         with:
           cosign-release: 'v2.1.1'
       - name: Verify runner image
         run: cosign verify --certificate-identity ${{ env.RUNNERIMG_IDENTITY }} --certificate-oidc-issuer ${{ env.RUNNERIMG_ISSUER }} ${{ env.RUNNER_IMG }}
-      - uses: nais/docker-build-push@c1d05d5a796be7b24d59a2e76851acdcdbcaff7a # ratchet:nais/docker-build-push@v0
+      - uses: nais/docker-build-push@v0 # ratchet:exclude
         id: docker-build-push
         name: Build and push Docker image
         with:
           team: security-champion-admin
           pull: true
+          sbom: build/reports/bom.json
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           push_image: true
