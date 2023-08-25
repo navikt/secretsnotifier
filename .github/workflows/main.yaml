@@ -12,7 +12,7 @@ jobs:
     permissions:
       id-token: write
     env:
-      RUNNER_IMG: "gcr.io/distroless/static-debian11"
+      RUNNER_IMG: "gcr.io/distroless/java17-debian11:nonroot"
       RUNNERIMG_IDENTITY: "keyless@distroless.iam.gserviceaccount.com"
       RUNNERIMG_ISSUER: "https://accounts.google.com"
     outputs:
