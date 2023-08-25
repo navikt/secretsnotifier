@@ -45,7 +45,7 @@ jobs:
         with:
           team: security-champion-admin
           pull: true
-          sbom: build/reports/bom.json
+          byosbom: build/reports/bom.json
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           push_image: true
