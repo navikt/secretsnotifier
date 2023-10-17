@@ -15,7 +15,10 @@ fun main() = runBlocking {
     val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
 
     val repos = gitHub.reposWithSecretAlerts("navikt")
-    println("Found ${repos.size} repos with secrets alerts, notifying owners.")
+    println("Found ${repos.size} repos with secrets alerts")
+    if (repos.isNotEmpty()) {
+        println("Notifying owners")
+    }
 
     mutableMapOf<Team, List<RepoWithSecret>>().apply {
         repos.forEach { repo ->
