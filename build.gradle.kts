@@ -9,7 +9,7 @@ version = "generatedlater"
 
 plugins {
     kotlin("jvm") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.cyclonedx.bom") version "1.8.2"
 }
@@ -24,7 +24,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.2")
 }
 
 kotlin {
