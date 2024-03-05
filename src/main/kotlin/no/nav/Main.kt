@@ -33,7 +33,7 @@ fun main() = runBlocking {
     }.forEach { (team, repos) ->
         val heading = ":wave: *Hei, ${team.slug}* :github2:"
         val msg = "GitHub har oppdaget hemmeligheter i repo som dere er admin i:\n\n ${linksTo(repos)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
-        val result = slack.send(team.slackChannel, heading, msg)
+        val result = slack.send("jk-tullekanal", heading, msg)
         println("""Notifying ${team.slug} in ${team.slackChannel}: ${if (result.ok) "✅" else "❌ - " + result.errorMessage}""")
     }
     println("Done!")
