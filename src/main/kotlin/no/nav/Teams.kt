@@ -30,7 +30,7 @@ class Teams(private val http: HttpClient, private val authToken: String) {
 
     private suspend fun performGqlRequest(repoFullName: String, offset: Int): GqlResponse {
         val queryString = """query(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { 
-                      teams(filter: ${"$"}filter, offset: $offset, limit: ${"$"}limit) { 
+                      teams(filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { 
                           nodes { 
                               slug 
                               slackChannel 
