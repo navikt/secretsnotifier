@@ -21,9 +21,9 @@ class Teams(private val http: HttpClient, private val authToken: String) {
         var offset = 0
         do {
             val response = performGqlRequest(repoFullName, offset)
-            teams += response.data.nodes
-            offset += response.data.pageInfo.totalCount
-        } while (response.data.pageInfo.hasNextPage)
+            teams += response.data.teams.nodes
+            offset += response.data.teams.pageInfo.totalCount
+        } while (response.data.teams.pageInfo.hasNextPage)
 
         return teams
     }
