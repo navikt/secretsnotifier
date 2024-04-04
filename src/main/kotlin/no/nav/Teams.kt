@@ -6,24 +6,20 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpHeaders.UserAgent
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 class Teams(private val http: HttpClient, private val authToken: String) {
     private val baseUrl = "https://console.nav.cloud.nais.io/query"
 
     suspend fun adminsFor(repoFullName: String): List<Team> {
         val teams = mutableListOf<Team>()
-        var offset = 0
+        val offset = 0
         do {
             val response = performGqlRequest(repoFullName, offset)
             teams += response.data.teams.nodes
-            offset += response.data.teams.pageInfo.totalCount
         } while (response.data.teams.pageInfo.hasNextPage)
 
         return teams
@@ -42,14 +38,12 @@ class Teams(private val http: HttpClient, private val authToken: String) {
                       } 
                   } """
         val reqBody = RequestBody(queryString.replace("\n", " "), Variables(Filter(GitHubFilter(repoFullName, "admin")), offset, 100))
-        val response = http.post(baseUrl) {
+        return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
-        }.body<String>()
-        println(response)
-        return kotlinx.serialization.json.Json.decodeFromString(response)
+        }.body<GqlResponse>()
     }
 }
 
@@ -78,6 +72,6 @@ data class GqlResponseTeams(val nodes: List<Team>, val pageInfo: PageInfo)
 data class Team(val slug: String, val slackChannel: String)
 
 @Serializable
-data class PageInfo(val totalCount: Int, val hasNextPage: Boolean)
+data class PageInfo(val hasNextPage: Boolean)
 
 
