@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -16,8 +17,8 @@ fun main() = runBlocking {
 
     val repos = gitHub.reposWithSecretAlerts("navikt")
     println("Found ${repos.size} repos with secrets alerts")
-    if (repos.isNotEmpty()) {
-        println("Notifying owners")
+    if (repos.isEmpty()) {
+        this.cancel("Nothing more to do")
     }
 
     mutableMapOf<Team, List<RepoWithSecret>>().apply {
@@ -32,15 +33,20 @@ fun main() = runBlocking {
         }
     }.forEach { (team, repos) ->
         val heading = ":wave: *Hei, ${team.slug}* :github2:"
-        val msg = "GitHub har oppdaget hemmeligheter i repo som dere er admin i:\n\n ${linksTo(repos)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
-        val result = slack.send(team.slackChannel, heading, msg)
-        println("""Notifying ${team.slug} in ${team.slackChannel}: ${if (result.ok) "✅" else "❌ - " + result.errorMessage}""")
+        val msg =
+            "GitHub har oppdaget hemmeligheter i repo som dere er admin i:\n\n ${linksTo(repos)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
+        try {
+            val result = slack.send(team.slackChannel, heading, msg)
+            println("""Notified ${team.slug} in ${team.slackChannel}: ${if (result.ok) "✅" else "❌ - " + result.errorMessage}""")
+        } catch (ex: Exception) {
+            println("Error while notifying ${team.slug} in ${team.slackChannel}: ${ex.message}")
+        }
     }
     println("Done!")
 }
 
 private fun envOrDie(name: String) = System.getProperty(name)
-    ?:System.getenv(name)
+    ?: System.getenv(name)
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
 
 @OptIn(ExperimentalSerializationApi::class)
