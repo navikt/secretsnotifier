@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpHeaders.UserAgent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 class Teams(private val http: HttpClient, private val authToken: String) {
     private val baseUrl = "https://console.nav.cloud.nais.io/query"
@@ -40,13 +41,15 @@ class Teams(private val http: HttpClient, private val authToken: String) {
                           } 
                       } 
                   } """
-        val reqBody = RequestBody(queryString.replace("\n", " "), Variables(Filter(GitHubFilter(repoFullName, "admin")), 0, 0))
-        return http.post(baseUrl) {
+        val reqBody = RequestBody(queryString.replace("\n", " "), Variables(Filter(GitHubFilter(repoFullName, "admin")), offset, 100))
+        val response = http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
-        }.body<GqlResponse>()
+        }.body<String>()
+        println(response)
+        return kotlinx.serialization.json.Json.decodeFromString(response)
     }
 }
 
