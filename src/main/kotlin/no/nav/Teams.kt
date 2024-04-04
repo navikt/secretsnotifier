@@ -66,7 +66,10 @@ data class RequestBody(val query: String, val variables: Variables)
 data class GqlResponse(val data: GqlResponseData)
 
 @Serializable
-data class GqlResponseData(val nodes: List<Team>, val pageInfo: PageInfo)
+data class GqlResponseData(val teams: GqlResponseTeams)
+
+@Serializable
+data class GqlResponseTeams(val nodes: List<Team>, val pageInfo: PageInfo)
 
 @Serializable
 data class Team(val slug: String, val slackChannel: String)
