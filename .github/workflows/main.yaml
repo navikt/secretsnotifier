@@ -19,15 +19,15 @@ jobs:
     outputs:
       tag: "${{ steps.docker-build-push.outputs.image }}"
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # ratchet:actions/checkout@v3
-      - uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # ratchet:actions/setup-java@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # ratchet:actions/checkout@v3
+      - uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # ratchet:actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
           cache: "gradle"
       - uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4 # ratchet:gradle/wrapper-validation-action@v1
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@243af859f8ca30903d9d7f7936897ca0358ba691 # ratchet:gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # ratchet:gradle/gradle-build-action@v2
         with:
           dependency-graph: generate-and-submit
       - name: Build and test the app
@@ -35,7 +35,7 @@ jobs:
       - name: Create SBOM
         run: ./gradlew cyclonedxBom
       - name: Install cosign
-        uses: sigstore/cosign-installer@37f387123cf7d4270454d0c351cf673ef28a8662 # ratchet:sigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@162dfdf7b9ab8be88c95b4fc982792c4c273e27a # ratchet:sigstore/cosign-installer@main
         with:
           cosign-release: 'v2.2.3'
       - name: Verify runner image
@@ -57,8 +57,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # ratchet:actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@913eb0f92e9d132dbe0cbba3390a340675849f30 # ratchet:nais/deploy/actions/deploy@v1
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # ratchet:actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@5d8720b0e670aec1ae02a4654c5445bc1ca01ca1 # ratchet:nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
