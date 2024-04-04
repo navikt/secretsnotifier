@@ -29,7 +29,7 @@ class Teams(private val http: HttpClient, private val authToken: String) {
     }
 
     private suspend fun performGqlRequest(repoFullName: String, offset: Int): GqlResponse {
-        val v = """query(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { 
+        val queryString = """query(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { 
                       teams(filter: ${"$"}filter, offset: $offset, limit: ${"$"}limit) { 
                           nodes { 
                               slug 
@@ -40,14 +40,12 @@ class Teams(private val http: HttpClient, private val authToken: String) {
                           } 
                       } 
                   } """
-        val queryString = "query teams(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { (filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { nodes { slug, slackChannel }, pageInfo{ hasNextPage } } }"
         val reqBody = RequestBody(queryString.replace("\n", " "), Variables(Filter(GitHubFilter(repoFullName, "admin")), 0, 0))
         return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
-            println(reqBody)
         }.body<GqlResponse>()
     }
 }
@@ -75,4 +73,5 @@ data class Team(val slug: String, val slackChannel: String)
 
 @Serializable
 data class PageInfo(val totalCount: Int, val hasNextPage: Boolean)
+
 
