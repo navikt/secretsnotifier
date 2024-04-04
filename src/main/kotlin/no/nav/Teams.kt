@@ -29,7 +29,7 @@ class Teams(private val http: HttpClient, private val authToken: String) {
     }
 
     private suspend fun performGqlRequest(repoFullName: String, offset: Int): GqlResponse {
-        val queryString = "query TeamsWithPermissionsInRepo(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { teams(filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { nodes { slug, slackChannel }, pageInfo{ hasNextPage } } }"
+        val queryString = "query teams(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { (filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { nodes { slug, slackChannel }, pageInfo{ hasNextPage } } }"
         val reqBody = RequestBody(queryString, Variables(Filter(GitHubFilter(repoFullName, "admin")), 0, 0))
         return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
