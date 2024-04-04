@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpHeaders.UserAgent
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 class Teams(private val http: HttpClient, private val authToken: String) {
@@ -28,29 +29,29 @@ class Teams(private val http: HttpClient, private val authToken: String) {
     }
 
     private suspend fun performGqlRequest(repoFullName: String, offset: Int): GqlResponse {
-        val queryString = """"query(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { teams(filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { nodes { slug, slackChannel }, pageInfo{ hasNextPage } } }",
-"variables": {
-    "filter": {
-        "github": {
-        "repoName": "$repoFullName",
-        "permissionName": "admin"
-    }
-    },
-    "offset": $offset,
-    "limit": 100
-}"""
-        val reqBody = RequestBody(queryString.replace("\n", " "))
+        val queryString = "query TeamsWithPermissionsInRepo(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { teams(filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { nodes { slug, slackChannel }, pageInfo{ hasNextPage } } }"
+        val reqBody = RequestBody(queryString, Variables(Filter(GitHubFilter(repoFullName, "admin")), 0, 0))
         return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
+            println(reqBody)
         }.body<GqlResponse>()
     }
 }
 
 @Serializable
-data class RequestBody(val query: String)
+data class Variables(val filter: Filter, val offset: Int, val limit: Int)
+
+@Serializable
+data class Filter(val github: GitHubFilter)
+
+@Serializable
+data class GitHubFilter(val repoName: String, val permissionName: String)
+
+@Serializable
+data class RequestBody(val query: String, val variables: Variables)
 
 @Serializable
 data class GqlResponse(val data: GqlResponseData)
