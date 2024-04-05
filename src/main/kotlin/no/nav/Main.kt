@@ -4,7 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.cancel
+import kotlin.system.exitProcess
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -18,7 +18,8 @@ fun main() = runBlocking {
     val repos = gitHub.reposWithSecretAlerts("navikt")
     println("Found ${repos.size} repos with secrets alerts")
     if (repos.isEmpty()) {
-        this.cancel("Nothing more to do")
+        println("Nothing else to do, exiting.")
+        exitProcess(0)
     }
 
     mutableMapOf<Team, List<RepoWithSecret>>().apply {
