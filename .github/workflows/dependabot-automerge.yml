@@ -112,7 +112,7 @@ jobs:
 
             const mergeable = (await Promise.all(mergeablePromise))
                 .filter((it) => {
-                  console.log(`is it mergeable? ${JSON.parse(it)}`)
+                  console.log(`is it mergeable? ${typeof it}`)
                   return it.mergeable;
                 })
 
