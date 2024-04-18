@@ -44,7 +44,7 @@ jobs:
             const filtrert = pulls.data
                 .filter((it) => it.state == 'open')
                 .filter((it) => !it.head.repo.fork)
-                .filter((it) => user.login === 'dependabot[bot]')
+                .filter((it) => it.user.login === 'dependabot[bot]')
                 .filter((it) => new Date(it.created_at).getTime() < (Date.now() - toDager))
                 .map((it) => {
                     return {
