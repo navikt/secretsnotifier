@@ -102,6 +102,7 @@ jobs:
                         repo: context.repo.repo,
                         pull_number: it.number
                     })
+                    console.log(prdata)
                     return {
                         title: it.title,
                         number: it.number,
