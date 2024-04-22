@@ -4,6 +4,7 @@ on:
     types:
       - opened
       - reopened
+      - edited
 jobs:
   build:
     name: Compile and test PRs
