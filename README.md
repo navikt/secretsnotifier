@@ -17,4 +17,3 @@ This project is maintained by [@security-champion-admin](https://github.com/orgs
 
 Questions and/or feature requests? Please create an [issue](https://github.com/navikt/secretsnotifier/issues).
 
-
