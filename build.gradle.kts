@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
-val ktorVersion = "2.3.11"
+val ktorVersion = "2.3.12"
 
 group = "no.nav"
 version = "generatedlater"
@@ -24,7 +24,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.1")
 }
 
 kotlin {
