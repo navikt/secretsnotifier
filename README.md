@@ -17,3 +17,4 @@ This project is maintained by [@appsec](https://github.com/orgs/navikt/teams/app
 
 Questions and/or feature requests? Please create an [issue](https://github.com/navikt/secretsnotifier/issues).
 
+ 
