@@ -16,9 +16,9 @@ jobs:
       id-token: write # nais docker-build-push
       contents: write # gradle dep submission
     env:
-      RUNNER_IMG: "gcr.io/distroless/java17-debian11:nonroot"
-      RUNNERIMG_IDENTITY: "keyless@distroless.iam.gserviceaccount.com"
-      RUNNERIMG_ISSUER: "https://accounts.google.com"
+      RUNNER_IMG: "cgr.dev/chainguard/jdk"
+      RUNNERIMG_IDENTITY: "https://github.com/chainguard-images/images/.github/workflows/release.yaml@refs/heads/main"
+      RUNNERIMG_ISSUER: "https://token.actions.githubusercontent.com"
     outputs:
       tag: "${{ steps.docker-build-push.outputs.image }}"
     steps:
