@@ -2,14 +2,14 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
-val ktorVersion = "2.3.12"
+val ktorVersion = "3.0.0"
 
 group = "no.nav"
 version = "generatedlater"
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    kotlin("plugin.serialization") version "2.0.20"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.cyclonedx.bom") version "1.10.0"
 }
