@@ -8,8 +8,8 @@ group = "no.nav"
 version = "generatedlater"
 
 plugins {
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.serialization") version "1.9.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.cyclonedx.bom") version "1.10.0"
 }
