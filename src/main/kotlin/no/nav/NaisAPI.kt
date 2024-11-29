@@ -11,7 +11,7 @@ import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpHeaders.UserAgent
 import kotlinx.serialization.Serializable
 
-class Teams(private val http: HttpClient, private val authToken: String) {
+class NaisAPI(private val http: HttpClient, private val authToken: String) {
     private val baseUrl = "https://console.nav.cloud.nais.io/query"
 
     suspend fun adminsFor(repoFullName: String): List<Team> {

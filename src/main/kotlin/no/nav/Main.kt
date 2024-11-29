@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 fun main() = runBlocking {
     println("Looking for repos with secrets alerts...")
     val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
-    val teams = Teams(httpClient, envOrDie("TEAMS_TOKEN"))
+    val naisAPI = NaisAPI(httpClient, envOrDie("TEAMS_TOKEN"))
     val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
 
     val repos = gitHub.reposWithSecretAlerts("navikt")
@@ -24,7 +24,7 @@ fun main() = runBlocking {
 
     mutableMapOf<Team, List<RepoWithSecret>>().apply {
         repos.forEach { repo ->
-            val admins = teams.adminsFor(repo.fullName)
+            val admins = naisAPI.adminsFor(repo.fullName)
             if (admins.isEmpty()) {
                 println("Unable to find owners for repo '${repo.name()}' 🤷")
             }
@@ -50,7 +50,6 @@ private fun envOrDie(name: String) = System.getProperty(name)
     ?: System.getenv(name)
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
 
-@OptIn(ExperimentalSerializationApi::class)
 private val httpClient = HttpClient(CIO) {
     expectSuccess = true
     install(ContentNegotiation) {
