@@ -34,7 +34,7 @@ jobs:
         with:
           dependency-graph: generate-and-submit
       - name: Build and test the app
-        run: ./gradlew test shadowJar
+        run: ./gradlew test build
       - name: Install cosign
         uses: sigstore/cosign-installer@162dfdf7b9ab8be88c95b4fc982792c4c273e27a # ratchet:sigstore/cosign-installer@main
         with:

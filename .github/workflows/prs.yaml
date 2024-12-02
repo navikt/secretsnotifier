@@ -22,7 +22,7 @@ jobs:
         with:
           dependency-graph: generate-and-submit
       - name: Build and test the app
-        run: ./gradlew test shadowJar
+        run: ./gradlew test build
 
 
 
