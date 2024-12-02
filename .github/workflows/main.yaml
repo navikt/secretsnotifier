@@ -35,8 +35,6 @@ jobs:
           dependency-graph: generate-and-submit
       - name: Build and test the app
         run: ./gradlew test shadowJar
-      - name: Create SBOM
-        run: ./gradlew cyclonedxBom
       - name: Install cosign
         uses: sigstore/cosign-installer@162dfdf7b9ab8be88c95b4fc982792c4c273e27a # ratchet:sigstore/cosign-installer@main
         with:
@@ -49,7 +47,6 @@ jobs:
         with:
           team: appsec
           pull: true
-          byosbom: build/reports/bom.json
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           push_image: true

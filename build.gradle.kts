@@ -1,4 +1,3 @@
-import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
 val ktorVersion = "3.0.1"
@@ -12,7 +11,6 @@ version = "yolo"
 plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
-    id("org.cyclonedx.bom") version "1.10.0"
 }
 
 repositories {
@@ -67,10 +65,5 @@ tasks {
 
     withType<Wrapper> {
         gradleVersion = "8.11.1"
-    }
-
-    withType<CycloneDxTask> {
-        setOutputFormat("json")
-        setIncludeLicenseText(false)
     }
 }
