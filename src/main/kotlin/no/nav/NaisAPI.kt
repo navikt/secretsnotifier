@@ -14,53 +14,59 @@ import kotlinx.serialization.Serializable
 class NaisAPI(private val http: HttpClient, private val authToken: String) {
     private val baseUrl = "https://console.nav.cloud.nais.io/query"
 
-    suspend fun adminsFor(repoFullName: String): List<Team> {
-        val teams = mutableListOf<Team>()
-        val offset = 0
+    suspend fun allTeamsAndTheirRepos(): Map<String, List<NaisApiRepository>> {
+        val allTeams = mutableMapOf<String, List<NaisApiRepository>>()
+        var teamsOffset = ""
         do {
-            val response = performGqlRequest(repoFullName, offset)
-            teams += response.data.teams.nodes
-        } while (response.data.teams.pageInfo.hasNextPage)
+            val gqlResponse = performGqlRequest(teamsOffset)
+            gqlResponse.data.teams.nodes.forEach { team ->
+                allTeams[team.slug] = team.repositories.nodes
+            }
+            teamsOffset = gqlResponse.data.teams.pageInfo.endCursor
+        } while (gqlResponse.data.teams.pageInfo.hasNextPage)
 
-        return teams
+        return allTeams
     }
 
-    private suspend fun performGqlRequest(repoFullName: String, offset: Int): GqlResponse {
-        val queryString = """query(${"$"}filter: TeamsFilter, ${"$"}offset: Int, ${"$"}limit: Int) { 
-                      teams(filter: ${"$"}filter, offset: ${"$"}offset, limit: ${"$"}limit) { 
-                          nodes { 
-                              slug 
-                              slackChannel 
-                          } 
-                          pageInfo{ 
-                              hasNextPage 
-                          } 
-                      } 
-                  } """
-        val reqBody = RequestBody(queryString.replace("\n", " "), Variables(Filter(GitHubFilter(repoFullName, "admin")), offset, 100))
+    private suspend fun performGqlRequest(teamsOffset: String): PaginatedGqlResponse {
+        val queryString = """query getTeamsAndRepos {
+                                teams(first:100 after:"$teamsOffset") {
+                                    pageInfo {
+                                        totalCount
+                                        hasNextPage
+                                        endCursor
+                                    }
+                                    nodes {
+                                        slug
+                                        slackChannel
+                                        repositories(first:100 after:"") {
+                                            pageInfo {
+                                                totalCount
+                                                hasNextPage
+                                                endCursor
+                                            }
+                                            nodes {
+                                                name
+                                            }
+                                        }
+                                    }
+                                }
+                            } """
+        val reqBody = RequestBody(queryString.replace("\n", " "))
         return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
-        }.body<GqlResponse>()
+        }.body<PaginatedGqlResponse>()
     }
 }
 
 @Serializable
-data class Variables(val filter: Filter, val offset: Int, val limit: Int)
+data class RequestBody(val query: String)
 
 @Serializable
-data class Filter(val github: GitHubFilter)
-
-@Serializable
-data class GitHubFilter(val repoName: String, val permissionName: String)
-
-@Serializable
-data class RequestBody(val query: String, val variables: Variables)
-
-@Serializable
-data class GqlResponse(val data: GqlResponseData)
+data class PaginatedGqlResponse(val data: GqlResponseData)
 
 @Serializable
 data class GqlResponseData(val teams: GqlResponseTeams)
@@ -69,9 +75,15 @@ data class GqlResponseData(val teams: GqlResponseTeams)
 data class GqlResponseTeams(val nodes: List<Team>, val pageInfo: PageInfo)
 
 @Serializable
-data class Team(val slug: String, val slackChannel: String)
+data class Team(val slug: String, val slackChannel: String, val repositories: NaisApiRepositories)
 
 @Serializable
-data class PageInfo(val hasNextPage: Boolean)
+data class NaisApiRepositories(val nodes: List<NaisApiRepository>, val pageInfo: PageInfo)
+
+@Serializable
+data class NaisApiRepository(val name: String)
+
+@Serializable
+data class PageInfo(val hasNextPage: Boolean, val endCursor: String)
 
 
