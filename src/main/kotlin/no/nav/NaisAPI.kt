@@ -14,15 +14,15 @@ import kotlinx.serialization.Serializable
 class NaisAPI(private val http: HttpClient, private val authToken: String) {
     private val baseUrl = "https://console.nav.cloud.nais.io/graphql"
 
-    suspend fun allTeamsAndTheirRepos(): Map<String, List<NaisApiRepository>> {
-        val allTeams = mutableMapOf<String, List<NaisApiRepository>>()
+    suspend fun allTeamsAndTheirRepos(): MutableMap<Team, List<NaisApiRepository>> {
+        val allTeams = mutableMapOf<Team, List<NaisApiRepository>>()
         var teamsOffset = ""
         val repoOffset = ""
         do {
             println("Querying for teams at offset '$teamsOffset'")
             val gqlResponse = performGqlRequest(teamsOffset, repoOffset)
             gqlResponse.data.teams.nodes.forEach { team ->
-                allTeams[team.slug] = team.repositories.nodes
+                allTeams[team] = team.repositories.nodes
             }
             teamsOffset = gqlResponse.data.teams.pageInfo.endCursor ?: ""
         } while (gqlResponse.data.teams.pageInfo.hasNextPage)

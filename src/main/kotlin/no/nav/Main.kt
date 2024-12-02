@@ -9,10 +9,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 fun main() = runBlocking {
-    println("Alright, here we go")
     val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
     val naisAPI = NaisAPI(httpClient, envOrDie("TEAMS_TOKEN"))
-    //val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
+    val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
 
     val reposWithSecretAlerts = gitHub.reposWithSecretAlerts("navikt")
     if (reposWithSecretAlerts.isEmpty()) {
@@ -27,8 +26,13 @@ fun main() = runBlocking {
     println("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
     reposWithSecretAlerts.forEach { repo ->
-        val owners = ownersFor(repo.fullName, allTeamsAndTheirRepos)
-        println("$repo is owned by $owners")
+        val owner = ownerFor(repo, allTeamsAndTheirRepos)
+        owner?.let {
+            val heading = ":wave: *Hei, ${owner.slug}* :github2:"
+            val msg =
+                "GitHub har oppdaget hemmeligheter i repo som dere eier:\n\n ${linkTo(repo)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
+            slack.send("#jk-tullekanal", heading, msg)
+        } ?: println("Unable to find an owner for ${repo.fullName}")
     }
 
     println("Done!")
@@ -38,10 +42,11 @@ private fun envOrDie(name: String) = System.getProperty(name)
     ?: System.getenv(name)
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
 
-private fun ownersFor(repo: String, allTeamsAndTheirRepos: Map<String, List<NaisApiRepository>>) =
+private fun ownerFor(repo: RepoWithSecret, allTeamsAndTheirRepos: Map<Team, List<NaisApiRepository>>) =
     allTeamsAndTheirRepos
-        .filter { (k, v) -> v.contains(NaisApiRepository(repo)) }
-        .map { (k, v) -> k }
+        .filter { (k, v) -> v.contains(NaisApiRepository(repo.fullName)) }
+        .map { it.key }
+        .firstOrNull()
 
 
 private val httpClient = HttpClient(CIO) {
@@ -54,7 +59,5 @@ private val httpClient = HttpClient(CIO) {
     }
 }
 
-private fun linksTo(repos: List<RepoWithSecret>) =
-    repos.joinToString(separator = "\n• ", prefix = "• ") { repo ->
+private fun linkTo(repo: RepoWithSecret) =
         "<https://github.com/${repo.fullName}/security/secret-scanning|${repo.name()} (${repo.secretType})>"
-    }
