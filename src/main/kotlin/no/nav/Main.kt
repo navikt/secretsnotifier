@@ -7,6 +7,10 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlin.system.exitProcess
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+val log: Logger = LoggerFactory.getLogger("secretsnotifier")
 
 fun main() = runBlocking {
     val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
@@ -15,15 +19,15 @@ fun main() = runBlocking {
 
     val reposWithSecretAlerts = gitHub.reposWithSecretAlerts("navikt")
     if (reposWithSecretAlerts.isEmpty()) {
-        println("No repos with secret alerts found, exiting.")
+        log.info("No repos with secret alerts found, exiting.")
         exitProcess(0)
     }
 
-    println("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
+    log.info("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
 
     val allTeamsAndTheirRepos = naisAPI.allTeamsAndTheirRepos()
     val repoCount = allTeamsAndTheirRepos.values.sumOf { it.size }
-    println("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
+    log.info("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
     reposWithSecretAlerts.forEach { repo ->
         val owner = ownerFor(repo, allTeamsAndTheirRepos)
@@ -31,11 +35,12 @@ fun main() = runBlocking {
             val heading = ":wave: *Hei, ${owner.slug}* :github2:"
             val msg =
                 "GitHub har oppdaget hemmeligheter i repo som dere eier:\n\n ${linkTo(repo)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
+            log.info("Alerting ${owner.slug} in ${owner.slackChannel}")
             slack.send(owner.slackChannel, heading, msg)
-        } ?: println("Unable to find an owner for ${repo.fullName}")
+        } ?: log.warn("Unable to find an owner for ${repo.fullName}")
     }
 
-    println("Done!")
+    log.info("Done!")
 }
 
 private fun envOrDie(name: String) = System.getProperty(name)
