@@ -23,7 +23,7 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
             gqlResponse.data.teams.nodes.forEach { team ->
                 allTeams[team.slug] = team.repositories.nodes
             }
-            teamsOffset = gqlResponse.data.teams.pageInfo.endCursor
+            teamsOffset = gqlResponse.data.teams.pageInfo.endCursor ?: ""
         } while (gqlResponse.data.teams.pageInfo.hasNextPage)
 
         return allTeams
@@ -85,6 +85,6 @@ data class NaisApiRepositories(val nodes: List<NaisApiRepository>, val pageInfo:
 data class NaisApiRepository(val name: String)
 
 @Serializable
-data class PageInfo(val hasNextPage: Boolean, val endCursor: String)
+data class PageInfo(val hasNextPage: Boolean, val endCursor: String?)
 
 
