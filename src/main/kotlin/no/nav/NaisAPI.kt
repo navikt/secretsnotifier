@@ -17,8 +17,9 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
     suspend fun allTeamsAndTheirRepos(): Map<String, List<NaisApiRepository>> {
         val allTeams = mutableMapOf<String, List<NaisApiRepository>>()
         var teamsOffset = ""
+        val repoOffset = ""
         do {
-            val gqlResponse = performGqlRequest(teamsOffset)
+            val gqlResponse = performGqlRequest(teamsOffset, repoOffset)
             gqlResponse.data.teams.nodes.forEach { team ->
                 allTeams[team.slug] = team.repositories.nodes
             }
@@ -28,7 +29,7 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
         return allTeams
     }
 
-    private suspend fun performGqlRequest(teamsOffset: String): PaginatedGqlResponse {
+    private suspend fun performGqlRequest(teamsOffset: String, repoOffset: String): PaginatedGqlResponse {
         val queryString = """query getTeamsAndRepos {
                                 teams(first:100 after:"$teamsOffset") {
                                     pageInfo {
@@ -39,7 +40,7 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
                                     nodes {
                                         slug
                                         slackChannel
-                                        repositories(first:100 after:"") {
+                                        repositories(first:100 after:"$repoOffset") {
                                             pageInfo {
                                                 totalCount
                                                 hasNextPage
