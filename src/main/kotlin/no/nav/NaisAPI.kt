@@ -19,6 +19,7 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
         var teamsOffset = ""
         val repoOffset = ""
         do {
+            println("querying for teams at offset '$teamsOffset'")
             val gqlResponse = performGqlRequest(teamsOffset, repoOffset)
             gqlResponse.data.teams.nodes.forEach { team ->
                 allTeams[team.slug] = team.repositories.nodes
