@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 fun main() = runBlocking {
-    println("Looking for repos with secrets alerts...")
+    println("Looking for teams...")
     //val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
     val naisAPI = NaisAPI(httpClient, envOrDie("TEAMS_TOKEN"))
     //val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))

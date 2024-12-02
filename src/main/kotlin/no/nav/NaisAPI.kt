@@ -12,7 +12,7 @@ import io.ktor.http.HttpHeaders.UserAgent
 import kotlinx.serialization.Serializable
 
 class NaisAPI(private val http: HttpClient, private val authToken: String) {
-    private val baseUrl = "https://console.nav.cloud.nais.io/query"
+    private val baseUrl = "https://console.nav.cloud.nais.io/graphql"
 
     suspend fun allTeamsAndTheirRepos(): Map<String, List<NaisApiRepository>> {
         val allTeams = mutableMapOf<String, List<NaisApiRepository>>()
