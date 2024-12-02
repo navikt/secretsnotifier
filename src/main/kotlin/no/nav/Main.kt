@@ -25,8 +25,8 @@ fun main() = runBlocking {
 
     log.info("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
 
-    val allTeamsAndTheirRepos = naisAPI.allTeamsAndTheirRepos()
-    val repoCount = allTeamsAndTheirRepos.values.sumOf { it.size }
+    val allTeamsAndTheirRepos = naisAPI.allTeams()
+    val repoCount = allTeamsAndTheirRepos.sumOf { it.repositories.nodes.size }
     log.info("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
     reposWithSecretAlerts.forEach { repo ->
@@ -36,7 +36,7 @@ fun main() = runBlocking {
             val msg =
                 "GitHub har oppdaget hemmeligheter i repo som dere eier:\n\n ${linkTo(repo)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
             log.info("Alerting ${owner.slug} in ${owner.slackChannel}")
-            slack.send(owner.slackChannel, heading, msg)
+            slack.send("#jk-tullekanal", heading, msg)
         } ?: log.warn("Unable to find an owner for ${repo.fullName}")
     }
 
@@ -47,11 +47,10 @@ private fun envOrDie(name: String) = System.getProperty(name)
     ?: System.getenv(name)
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
 
-private fun ownerFor(repo: RepoWithSecret, allTeamsAndTheirRepos: Map<Team, List<NaisApiRepository>>) =
-    allTeamsAndTheirRepos
-        .filter { (k, v) -> v.contains(NaisApiRepository(repo.fullName)) }
-        .map { it.key }
-        .firstOrNull()
+internal fun ownerFor(repo: RepoWithSecret, allTeamsAndTheirRepos: List<Team>) =
+    allTeamsAndTheirRepos.firstOrNull {
+        it.repositories.nodes.contains(NaisApiRepository(repo.fullName))
+    }
 
 
 private val httpClient = HttpClient(CIO) {
