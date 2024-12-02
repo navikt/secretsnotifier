@@ -26,12 +26,23 @@ fun main() = runBlocking {
     val repoCount = allTeamsAndTheirRepos.values.sumOf { it.size }
     println("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
+    reposWithSecretAlerts.forEach { repo ->
+        val owners = ownersFor(repo.fullName, allTeamsAndTheirRepos)
+        println("$repo is owned by $owners")
+    }
+
     println("Done!")
 }
 
 private fun envOrDie(name: String) = System.getProperty(name)
     ?: System.getenv(name)
     ?: throw RuntimeException("Unable to find env var $name, I'm useless without it")
+
+private fun ownersFor(repo: String, allTeamsAndTheirRepos: Map<String, List<NaisApiRepository>>) =
+    allTeamsAndTheirRepos
+        .filter { (k, v) -> v.contains(NaisApiRepository(repo)) }
+        .map { (k, v) -> k }
+
 
 private val httpClient = HttpClient(CIO) {
     expectSuccess = true
