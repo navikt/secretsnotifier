@@ -1,5 +1,5 @@
 FROM cgr.dev/chainguard/jre
 
-COPY build/libs/app-all.jar /app/app-all.jar
+COPY build/libs/*.jar /app/
 
-CMD ["-jar", "/app/app-all.jar"]
+CMD ["-jar", "/app/app-yolo.jar"]

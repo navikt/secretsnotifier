@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
@@ -8,12 +7,11 @@ val logbackVersion = "1.5.12"
 val logstashEncoderVersion = "8.0"
 
 group = "no.nav"
-version = "generatedlater"
+version = "yolo"
 
 plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.cyclonedx.bom") version "1.10.0"
 }
 
@@ -59,22 +57,16 @@ tasks {
         }
     }
 
-    withType<ShadowJar>{
-        archiveFileName.set("app-all.jar")
-    }
-
     withType<Test> {
         useJUnitPlatform()
         testLogging {
             showExceptions = true
-        }
-        testLogging {
             exceptionFormat = FULL
         }
     }
 
     withType<Wrapper> {
-        gradleVersion = "8.10.2"
+        gradleVersion = "8.11.1"
     }
 
     withType<CycloneDxTask> {
