@@ -25,21 +25,21 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
         } while (apiResponse.data.teams.pageInfo.hasNextPage)
 
         allTeams.forEach { team ->
-            team.repositories.nodes = reposBelongingTo(team)
+            team.repositories?.nodes = reposBelongingTo(team)
         }
 
         return allTeams
     }
 
     private suspend fun reposBelongingTo(team: Team): MutableList<NaisApiRepository> {
-        val allRepos = team.repositories.nodes
-        var keepGoing = team.repositories.pageInfo.hasNextPage
-        var cursor = team.repositories.pageInfo.endCursor ?: ""
+        val allRepos = (team.repositories?.nodes ?: emptyList()).toMutableList()
+        var keepGoing = team.repositories?.pageInfo?.hasNextPage ?: false
+        var cursor = team.repositories?.pageInfo?.endCursor ?: ""
         while (keepGoing) {
             val apiResponse: SingleTeamResponse = run(singleTeamQuery(team.slug, cursor))
-            allRepos += apiResponse.data.team.repositories.nodes
-            keepGoing = apiResponse.data.team.repositories.pageInfo.hasNextPage
-            cursor = apiResponse.data.team.repositories.pageInfo.endCursor ?: ""
+            allRepos += apiResponse.data.team.repositories?.nodes ?: emptyList()
+            keepGoing = apiResponse.data.team.repositories?.pageInfo?.hasNextPage ?: false
+            cursor = apiResponse.data.team.repositories?.pageInfo?.endCursor ?: ""
         }
         return allRepos
     }
@@ -107,7 +107,7 @@ data class SingleTeamResponseData(val team: Team)
 data class AllTeams(val nodes: List<Team>, val pageInfo: PageInfo)
 
 @Serializable
-data class Team(val slug: String, val slackChannel: String, val repositories: Repositories)
+data class Team(val slug: String, val slackChannel: String, val repositories: Repositories?)
 
 @Serializable
 data class Repositories(var nodes: MutableList<NaisApiRepository>, val pageInfo: PageInfo)
