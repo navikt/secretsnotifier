@@ -7,7 +7,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpHeaders
-import java.lang.RuntimeException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
