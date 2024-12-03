@@ -18,7 +18,6 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
         val allTeams = mutableListOf<Team>()
         var teamsCursor = ""
         do {
-            log.info("Querying for teams at offset '$teamsCursor'")
             val apiResponse: AllTeamsResponse = run(allTeamsQuery(teamsCursor))
             allTeams += apiResponse.data.teams.nodes
             teamsCursor = apiResponse.data.teams.pageInfo.endCursor ?: ""
@@ -33,7 +32,7 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
 
     private suspend fun reposBelongingTo(team: Team): MutableList<NaisApiRepository> {
         val allRepos = (team.repositories?.nodes ?: emptyList()).toMutableList()
-        var keepGoing = team.repositories?.pageInfo?.hasNextPage ?: false
+        var keepGoing = true
         var cursor = team.repositories?.pageInfo?.endCursor ?: ""
         while (keepGoing) {
             val apiResponse: SingleTeamResponse = run(singleTeamQuery(team.slug, cursor))
@@ -107,7 +106,7 @@ data class SingleTeamResponseData(val team: Team)
 data class AllTeams(val nodes: List<Team>, val pageInfo: PageInfo)
 
 @Serializable
-data class Team(val slug: String, val slackChannel: String, val repositories: Repositories?)
+data class Team(val slug: String, val slackChannel: String?, var repositories: Repositories? = Repositories(nodes = emptyList<NaisApiRepository>().toMutableList(), PageInfo(false,"")))
 
 @Serializable
 data class Repositories(var nodes: MutableList<NaisApiRepository>, val pageInfo: PageInfo)

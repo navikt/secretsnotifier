@@ -7,6 +7,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpHeaders
+import java.lang.RuntimeException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,7 +20,9 @@ class Slack(private val http: HttpClient, private val authToken: String) {
         val heading = ":wave: *Hei, ${owner.slug}* :github2:"
         val msg =
             "GitHub har oppdaget hemmeligheter i repo som dere eier:\n\n ${linkTo(repo)}\n\n Dersom hemmelighetene er aktive må de *roteres* så fort som mulig, og videre varsling og steg for å avdekke evt. misbruk må iverksettes. \n\n :warning: Husk at Git aldri glemmer, så kun fjerning fra koden er IKKE tilstrekkelig.\n\nNår dette er gjort (eller dersom dette er falske positiver) lukkes varselet ved å velge i nedtrekksmenyen `Close as`.\n\nDu kan også lese mer om håndtering av hemmeligheter i vår <https://sikkerhet.nav.no/docs/sikker-utvikling/hemmeligheter|Security Playbook>"
-        postTheMessage(owner.slackChannel, heading, msg)
+        owner.slackChannel?.let {
+            channel -> postTheMessage(channel, heading, msg)
+        }?: log.warn("${owner.slug} doesn't have a slack channel")
     }
 
     private suspend fun postTheMessage(channel: String, heading: String, msg: String): SlackResponse {

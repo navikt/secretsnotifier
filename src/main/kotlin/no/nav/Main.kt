@@ -26,7 +26,7 @@ fun main() = runBlocking {
 //    log.info("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
 
     val allTeamsAndTheirRepos = naisAPI.allTeams()
-    val repoCount = allTeamsAndTheirRepos.sumOf { it.repositories.nodes.size }
+    val repoCount = allTeamsAndTheirRepos.sumOf { it.repositories?.nodes?.size ?: 0 }
     log.info("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
 //    reposWithSecretAlerts.forEach { repo ->
@@ -45,7 +45,7 @@ private fun envOrDie(name: String) = System.getProperty(name)
 
 internal fun ownerFor(repo: RepoWithSecret, allTeamsAndTheirRepos: List<Team>) =
     allTeamsAndTheirRepos.firstOrNull {
-        it.repositories.nodes.contains(NaisApiRepository(repo.fullName))
+        it.repositories?.nodes?.contains(NaisApiRepository(repo.fullName)) ?: false
     }
 
 
