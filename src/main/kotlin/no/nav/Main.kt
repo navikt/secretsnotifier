@@ -13,28 +13,28 @@ import org.slf4j.LoggerFactory
 val log: Logger = LoggerFactory.getLogger("secretsnotifier")
 
 fun main() = runBlocking {
-//    val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
+    val gitHub = GitHub(httpClient, envOrDie("GITHUB_TOKEN"))
     val naisAPI = NaisAPI(httpClient, envOrDie("TEAMS_TOKEN"))
-//    val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
+    val slack = Slack(httpClient, envOrDie("SLACK_TOKEN"))
 
-//    val reposWithSecretAlerts = gitHub.reposWithSecretAlerts("navikt")
-//    if (reposWithSecretAlerts.isEmpty()) {
-//        log.info("No repos with secret alerts found, exiting.")
-//        exitProcess(0)
-//    }
-//
-//    log.info("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
+    val reposWithSecretAlerts = gitHub.reposWithSecretAlerts("navikt")
+    if (reposWithSecretAlerts.isEmpty()) {
+        log.info("No repos with secret alerts found, exiting.")
+        exitProcess(0)
+    }
+
+    log.info("Found ${reposWithSecretAlerts.size} repos with secret alerts, now let's find their owners")
 
     val allTeamsAndTheirRepos = naisAPI.allTeams()
     val repoCount = allTeamsAndTheirRepos.sumOf { it.repositories?.nodes?.size ?: 0 }
     log.info("Found ${allTeamsAndTheirRepos.size} teams with a total of $repoCount repos")
 
-//    reposWithSecretAlerts.forEach { repo ->
-//        val owner = ownerFor(repo, allTeamsAndTheirRepos)
-//        owner?.let {
-//            slack.sendAlert(repo, owner)
-//        } ?: log.warn("Unable to find an owner for ${repo.fullName}")
-//    }
+    reposWithSecretAlerts.forEach { repo ->
+        val owner = ownerFor(repo, allTeamsAndTheirRepos)
+        owner?.let {
+            slack.sendAlert(repo, owner)
+        } ?: log.warn("Unable to find an owner for ${repo.fullName}")
+    }
 
     log.info("Done!")
 }
