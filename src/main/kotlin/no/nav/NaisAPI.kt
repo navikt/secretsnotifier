@@ -16,69 +16,101 @@ class NaisAPI(private val http: HttpClient, private val authToken: String) {
 
     suspend fun allTeams(): List<Team> {
         val allTeams = mutableListOf<Team>()
-        var teamsOffset = ""
-        val repoOffset = ""
+        var teamsCursor = ""
         do {
-            log.info("Querying for teams at offset '$teamsOffset'")
-            val gqlResponse = performGqlRequest(teamsOffset, repoOffset)
-            allTeams += gqlResponse.data.teams.nodes
-            teamsOffset = gqlResponse.data.teams.pageInfo.endCursor ?: ""
-        } while (gqlResponse.data.teams.pageInfo.hasNextPage)
+            log.info("Querying for teams at offset '$teamsCursor'")
+            val apiResponse: AllTeamsResponse = run(allTeamsQuery(teamsCursor))
+            allTeams += apiResponse.data.teams.nodes
+            teamsCursor = apiResponse.data.teams.pageInfo.endCursor ?: ""
+        } while (apiResponse.data.teams.pageInfo.hasNextPage)
+
+        allTeams.forEach { team ->
+            team.repositories.nodes = reposBelongingTo(team)
+        }
 
         return allTeams
     }
 
-    private suspend fun performGqlRequest(teamsOffset: String, repoOffset: String): PaginatedGqlResponse {
-        val queryString = """query getTeamsAndRepos {
-                                teams(first:100 after:"$teamsOffset") {
-                                    pageInfo {
-                                        totalCount
-                                        hasNextPage
-                                        endCursor
-                                    }
-                                    nodes {
-                                        slug
-                                        slackChannel
-                                        repositories(first:100 after:"$repoOffset") {
-                                            pageInfo {
-                                                totalCount
-                                                hasNextPage
-                                                endCursor
-                                            }
-                                            nodes {
-                                                name
-                                            }
-                                        }
-                                    }
-                                }
-                            } """
+    private suspend fun reposBelongingTo(team: Team): MutableList<NaisApiRepository> {
+        val allRepos = team.repositories.nodes
+        var keepGoing = team.repositories.pageInfo.hasNextPage
+        var cursor = team.repositories.pageInfo.endCursor ?: ""
+        while (keepGoing) {
+            val apiResponse: SingleTeamResponse = run(singleTeamQuery(team.slug, cursor))
+            allRepos += apiResponse.data.team.repositories.nodes
+            keepGoing = apiResponse.data.team.repositories.pageInfo.hasNextPage
+            cursor = apiResponse.data.team.repositories.pageInfo.endCursor ?: ""
+        }
+        return allRepos
+    }
+
+    private suspend inline fun <reified T> run(queryString: String): T {
         val reqBody = RequestBody(queryString.replace("\n", " "))
         return http.post(baseUrl) {
             header(Authorization, "Bearer $authToken")
             header(UserAgent, "NAV IT McBotFace")
             header(ContentType, Json)
             setBody(reqBody)
-        }.body<PaginatedGqlResponse>()
+        }.body<T>()
     }
+
+    private fun allTeamsQuery(teamsCursor: String) =
+        """query allTeams {
+          teams(first:100 after:"$teamsCursor") {
+             pageInfo {
+                totalCount
+                hasNextPage
+                endCursor
+             }
+             nodes {
+                slug
+                slackChannel
+             }
+          }
+      } """
+
+    private fun singleTeamQuery(slug: String, repoCursor: String) = """
+    query singleTeam {
+       team(slug:"$slug") {
+          slug
+          repositories(first:100 after:"$repoCursor") {
+             pageInfo {
+                totalCount
+                hasNextPage
+                endCursor
+             }
+             nodes {
+                name
+             }
+          }
+       }
+    }
+"""
 }
 
 @Serializable
 data class RequestBody(val query: String)
 
 @Serializable
-data class PaginatedGqlResponse(val data: GqlResponseData)
+data class AllTeamsResponse(val data: AllTeamsResponseData)
 
 @Serializable
-data class GqlResponseData(val teams: GqlResponseTeams)
+data class SingleTeamResponse(val data: SingleTeamResponseData)
 
 @Serializable
-data class GqlResponseTeams(val nodes: List<Team>, val pageInfo: PageInfo)
+data class AllTeamsResponseData(val teams: AllTeams)
 
 @Serializable
-data class Team(val slug: String, val slackChannel: String, val repositories: NaisApiRepositories)
+data class SingleTeamResponseData(val team: Team)
 
 @Serializable
-data class NaisApiRepositories(val nodes: List<NaisApiRepository>, val pageInfo: PageInfo)
+data class AllTeams(val nodes: List<Team>, val pageInfo: PageInfo)
+
+@Serializable
+data class Team(val slug: String, val slackChannel: String, val repositories: Repositories)
+
+@Serializable
+data class Repositories(var nodes: MutableList<NaisApiRepository>, val pageInfo: PageInfo)
 
 @Serializable
 data class NaisApiRepository(val name: String)
