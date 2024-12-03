@@ -7,9 +7,9 @@ class RepoMatchingTests {
     @Test
     fun `first team with supplied repo is designated as owner`() {
         val teams = listOf(
-            Team("team1", "#yolo1", NaisApiRepositories(listOf(NaisApiRepository("repo1")), PageInfo(false, ""))),
-            Team("team2", "#yolo2", NaisApiRepositories(listOf(NaisApiRepository("repo2")), PageInfo(false, ""))),
-            Team("team3", "#yolo3", NaisApiRepositories(listOf(NaisApiRepository("repo2")), PageInfo(false, "")))
+            Team("team1", "#yolo1", Repositories(mutableListOf(NaisApiRepository("repo1")), PageInfo(false, ""))),
+            Team("team2", "#yolo2", Repositories(mutableListOf(NaisApiRepository("repo2")), PageInfo(false, ""))),
+            Team("team3", "#yolo3", Repositories(mutableListOf(NaisApiRepository("repo2")), PageInfo(false, "")))
         )
 
         val expected = "team2"
