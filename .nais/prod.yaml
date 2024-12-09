@@ -1,2 +1,2 @@
-schedule: "0,30 * * * *"
+schedule: 0 7-17 * * 1-5"
 alert_channel: "appsec-aktivitet"
