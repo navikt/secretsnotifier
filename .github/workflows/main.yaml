@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - "*.md"
   workflow_run:
-    workflows: ['Merge Dependabot PRs']
+    workflows: ['Dependabot auto-merge']
     types: [completed]
 jobs:
   build:
