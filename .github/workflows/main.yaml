@@ -23,6 +23,8 @@ jobs:
       tag: "${{ steps.docker-build-push.outputs.image }}"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # ratchet:actions/setup-java@v4
         with:
           java-version: "21"
@@ -57,6 +59,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: nais/deploy/actions/deploy@36f87b6d4722fb7f45f19218bf86ad698829ce70 # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
