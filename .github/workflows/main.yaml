@@ -34,7 +34,7 @@ jobs:
       - name: Build and test the app
         run: ./gradlew test build
       - name: Install cosign
-        uses: sigstore/cosign-installer@162dfdf7b9ab8be88c95b4fc982792c4c273e27a # ratchet:sigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@789d2886c082e8fb7b9710810b73c3f0840573ed # ratchet:sigstore/cosign-installer@main
         with:
           cosign-release: 'v2.4.1'
       - name: Verify runner image
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: nais/deploy/actions/deploy@36f87b6d4722fb7f45f19218bf86ad698829ce70 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@ac22cefe8dc67c94045174f072ddaa1232833f1f # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/nais.yaml,.nais/alerts.yaml
