@@ -3,7 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 val ktorVersion = "3.1.2"
 val junitVersion = "5.12.1"
 val logbackVersion = "1.5.18"
-val logstashEncoderVersion = "8.0"
+val logstashEncoderVersion = "8.1"
 
 group = "no.nav"
 version = "yolo"
@@ -23,7 +23,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
