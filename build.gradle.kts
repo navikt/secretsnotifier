@@ -1,7 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
-val ktorVersion = "3.2.0"
-val junitVersion = "5.13.2"
+val ktorVersion = "3.2.1"
+val junitVersion = "5.13.3"
 val logbackVersion = "1.5.18"
 val logstashEncoderVersion = "8.1"
 
