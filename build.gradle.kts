@@ -2,15 +2,15 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 
 val ktorVersion = "3.4.0"
 val junitVersion = "6.0.2"
-val logbackVersion = "1.5.27"
+val logbackVersion = "1.5.28"
 val logstashEncoderVersion = "9.0"
 
 group = "no.nav"
 version = "yolo"
 
 plugins {
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 repositories {
